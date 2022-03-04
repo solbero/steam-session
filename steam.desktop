@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Steam
+Comment=This session will start Steam with xfwm4 as the window manager
+Exec=/usr/local/bin/steam-session
+Icon=steam
+Type=Application
