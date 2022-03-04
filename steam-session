@@ -13,11 +13,10 @@ from time import sleep
 
 # Globals
 temp_dir = Path(tempfile.gettempdir())
-log_file = "steam-session.log"
+log_file = temp_dir / "steam-session.log"
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename=temp_dir / log_file,
-                    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(filename=str(log_file), level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def is_program_running(name: str) -> bool:
@@ -53,31 +52,30 @@ def run_executable(name: str, flags: str = "") -> None:
         name: Name of executable to run.
         flags (optional): Flags to append to executable. Defaults to "".
     """
-    if cmd := shutil.which(f"{name}"):
-        run_shell_command(f"{cmd} {flags}")
+    if path := shutil.which(f"{name}"):
+        cmd = shlex.split(path + flags)
+        run_shell_command(cmd)
     else:
-        logger.error(f"Could not locate '{name}'")
+        logging.error(f"Could not locate '{name}'")
 
 
-def run_shell_command(cmd: str) -> None:
+def run_shell_command(cmd: list[str]) -> None:
     """Run a command using subprocess.
 
     Args:
         cmd: Command to run.
     """
-    # Parse command to list
-    args = shlex.split(cmd)
-    logger.info(f"Subprocess: '{cmd}'")
+    logging.info(f"Subprocess: '{' '.join(cmd)}'")
 
     try:
         # Run program
         process = subprocess.Popen(
-            args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         process_output, _ = process.communicate()
         log_process_output(process_output)
     except (OSError, subprocess.CalledProcessError) as exception:
-        logger.error(f"Exception occurred: {str(exception)}")
-        logger.error("Subprocess failed!")
+        logging.error(f"Exception occurred: {str(exception)}")
+        logging.error("Subprocess failed!")
     else:
         logging.info("Subprocess finished")
 
@@ -105,10 +103,10 @@ def main() -> None:
     run_executable("steam")
 
     # Monitor the steam process and restart if stopped
-    while is_running := is_program_running("steam"):
-        if not is_running:
+    while running := is_program_running("steam"):
+        if not running:
             run_executable("steam")
-            logger.info("Steam has stopped. Restarting")
+            logging.info("Steam has stopped. Restarting")
         else:
             sleep(1)
 
