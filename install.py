@@ -14,6 +14,7 @@ if os.geteuid() != 0:
     sys.exit("You need to have root privileges to run this script.\nPlease try again using 'sudo'. Exiting.")
 
 if len(sys.argv) == 1:
+    print()
     print(f"Usage {__file__} [OPTION]")
     print()
     print("OPTIONS:")
