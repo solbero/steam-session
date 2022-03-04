@@ -1,51 +1,73 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import shutil
+import sys
 from pathlib import Path
 
-source_dir = Path.cwd()
+src_dir = Path.cwd()
 bin_dir = Path("/usr/local/bin/")
 xsession_dir = Path("/usr/share/xsessions/")
 
+print(sys.argv)
 
-if os.geteuid() != 0:
-    sys.exit("You need to have root privileges to run this script.\nPlease try again using 'sudo'. Exiting.")
 
-if len(sys.argv) == 1:
+def help() -> None:
+    """Help message"""
     print()
-    print(f"Usage {__file__} [OPTION]")
-    print()
+    print("Usage install.py [OPTION]")
     print("OPTIONS:")
     print("\t-i, --install")
     print("\t-r, --remove")
+    print()
 
-else:
-    if sys.argv[1] == ("-i" or "--install"):
-        print("Installing steam-session")
 
-        shutil.copyfile(source_dir / "/steam-session.py",
-                        bin_dir / "steam-session.py")
-        print(f"Copied file to {bin_dir / 'steam-session.py'}")
+def install(file: str, source: Path, destination: Path) -> None:
+    source_file = source / file
 
-        shutil.copyfile(source_dir / "steam.desktop",
-                        xsession_dir / "steam.desktop")
-        print(f"Copied file to {xsession_dir / 'steam.desktop'}")
+    if not destination.exists():
+        print(f"Folder '{destination}' does not exist")
+        destination.mkdir()
+        print(f"Created folder '{destination}'")
 
-    elif sys.argv[1] == ("-r" or "--remove"):
-        print("Removing steam-session")
-        try:
-            (bin_dir / "steam-session.py").unlink()
-            print(f"Removed file from {bin_dir / 'steam-session.py'}")
-        except FileNotFoundError:
-            print(f"{bin_dir / 'steam-session.py'} does not exist")
+    shutil.copy(source_file, destination)
+    print(f"Copied '{file}' to '{destination / file}'")
 
-        try:
-            (xsession_dir / "steam.desktop").unlink()
-            print(f"Removed file from {xsession_dir / 'steam.desktop'}")
-        except FileNotFoundError:
-            print(f"{xsession_dir / 'steam.desktop'} does not exist")
+
+def remove(file: str, path: Path) -> None:
+    file_path = path / file
+
+    try:
+        file_path.unlink()
+        print(f"Removed file '{file_path}'")
+    except FileNotFoundError:
+        print(f"'{file_path}' does not exist")
+
+
+if __name__ == "__main__":
+
+    if os.geteuid() != 0:
+        sys.exit("You need to have root privileges to run this script.\n \
+            Please try again using 'sudo'. Exiting.")
+
+    if len(sys.argv) == 1:
+        # Print help message if called without arguments
+        help()
 
     else:
-        print("Invalid flag")
+        if sys.argv[1] == "-i" or sys.argv[1] == "--install":
+            print("Installing steam-session")
+
+            # Install session files
+            install("steam-session", src_dir, bin_dir)
+            install("steam.desktop", src_dir, xsession_dir)
+
+        elif sys.argv[1] == "-r" or sys.argv[1] == "--remove":
+            print("Removing steam-session")
+
+            # Remove session files
+            remove("steam-session", bin_dir)
+            remove("steam.desktop", xsession_dir)
+
+        else:
+            print(f"Unrecognized argument: {' '.join(sys.argv[1:])}")
