@@ -3,6 +3,7 @@
 import os
 import shutil
 import sys
+import stat
 from pathlib import Path
 
 src_dir = Path.cwd()
@@ -22,7 +23,7 @@ def help() -> None:
     print()
 
 
-def install(file: str, source: Path, destination: Path) -> None:
+def install(file: str, source: Path, destination: Path, executable: bool = False) -> None:
     source_file = source / file
 
     if not destination.exists():
@@ -32,6 +33,12 @@ def install(file: str, source: Path, destination: Path) -> None:
 
     shutil.copy(source_file, destination)
     print(f"Copied '{file}' to '{destination / file}'")
+
+    if executable is True:
+        mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
+        os.chmod(destination / file, mode)
+        print(f"Mode of '{destination / file}' set to {oct(mode)[2:]}")
+
 
 
 def remove(file: str, path: Path) -> None:
@@ -59,7 +66,7 @@ if __name__ == "__main__":
             print("Installing steam-session")
 
             # Install session files
-            install("steam-session", src_dir, bin_dir)
+            install("steam-session", src_dir, bin_dir, executable=True)
             install("steam.desktop", src_dir, xsession_dir)
 
         elif sys.argv[1] == "-r" or sys.argv[1] == "--remove":
