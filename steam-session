@@ -4,21 +4,28 @@
 import logging
 import psutil
 import shlex
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from io import StringIO
 from time import sleep
+
+# Shell commands
+commands = {
+    "openbox": "openbox-session",
+    "xset": "xset s off -dpms",
+    "unclutter": "unclutter --start-hidden",
+    "steam": "steam -bigpicture -steamos"
+}
 
 # Logging
 temp_dir = Path(tempfile.gettempdir())
 log_file = temp_dir / "steam-session.log"
-logging.basicConfig(filename=str(log_file), level=logging.INFO,
-                    format="%(levelname)s - %(message)s")
+logging.basicConfig(filename=str(log_file), level=logging.DEBUG,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 
-def is_program_running(name: str) -> bool:
+# Functions
+def is_process_running(name: str) -> bool:
     """Check if program is running.
 
     Args:
@@ -44,70 +51,58 @@ def is_program_running(name: str) -> bool:
         return False
 
 
-def run_executable(name: str, flags: str = "") -> None:
-    """Locate and run a executable.
-
-    Args:
-        name: Name of executable to run.
-        flags (optional): Flags to append to executable. Defaults to "".
-    """
-    if path := shutil.which(f"{name}"):
-        cmd = shlex.split(path + flags)
-        run_shell_command(cmd)
-    else:
-        logging.error(f"Could not locate '{name}'")
+def monitor_process(name: str):
+    """Monitor a process and restart if stopped."""
+    logging.info(f"Starting to monitor '{name}' process")
+    while True:
+        if not is_process_running(name):
+            logging.info(f"Process '{name}' has stopped. Restarting")
+            run_shell_command(commands[name])
+        else:
+            sleep(1)
 
 
-def run_shell_command(cmd: list[str]) -> None:
+def run_shell_command(cmd: str) -> None:
     """Run a command using subprocess.
 
     Args:
         cmd: Command to run.
     """
-    logging.info(f"Subprocess: '{' '.join(cmd)}'")
+    cmd_args = shlex.split(cmd)
+    logging.info(f"Starting '{cmd_args[0]}'")
 
     try:
-        # Run program
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        process_output, _ = process.communicate()
-        log_process_output(process_output)
+        logging.debug(f"Subprocess called with: '{cmd_args}'")
+        subprocess.Popen(cmd_args, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+
     except (OSError, subprocess.CalledProcessError) as exception:
+        logging.error(f"Failed to start '{cmd_args[0]}'!")
         logging.error(f"Exception occurred: {str(exception)}")
-        logging.error("Subprocess failed!")
+
     else:
-        logging.info("Subprocess finished")
-
-
-def log_process_output(pipe: str) -> None:
-    """Log the output of a subprocess call.
-
-    Args:
-        pipe: Subprocess output to log.
-    """
-    file = StringIO(pipe)
-    # Read and log lines from subprocess pipe
-    for line in file.readlines():
-        logging.info(f"Got line from subprocess: {line}")
+        logging.debug("Subprocess finished")
 
 
 def main() -> None:
-    # Start the window manager
-    run_executable("xfwm4", "--replace")
+    # Start the desktop enviroment
+    run_shell_command(commands['lwm'])
 
     # Disable screen-saver and screen energy saving
-    run_executable("xset", "s off -dpms")
+    run_shell_command(commands['xset'])
+
+    # Hide the mouse cursor
+    run_shell_command(commands['unclutter'])
+
+    sleep(1)
 
     # Start steam
-    run_executable("steam")
+    run_shell_command(commands['steam'])
+
+    sleep(5)
 
     # Monitor the steam process and restart if stopped
-    while running := is_program_running("steam"):
-        if not running:
-            run_executable("steam")
-            logging.info("Steam has stopped. Restarting")
-        else:
-            sleep(1)
+    monitor_process("steam")
 
 
 if __name__ == "__main__":
