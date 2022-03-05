@@ -10,8 +10,6 @@ src_dir = Path.cwd()
 bin_dir = Path("/usr/local/bin/")
 xsession_dir = Path("/usr/share/xsessions/")
 
-print(sys.argv)
-
 
 def help() -> None:
     """Help message"""
@@ -38,7 +36,6 @@ def install(file: str, source: Path, destination: Path, executable: bool = False
         mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
         os.chmod(destination / file, mode)
         print(f"Mode of '{destination / file}' set to {oct(mode)[2:]}")
-
 
 
 def remove(file: str, path: Path) -> None:
