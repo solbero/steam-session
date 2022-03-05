@@ -11,12 +11,11 @@ from pathlib import Path
 from io import StringIO
 from time import sleep
 
-# Globals
+# Logging
 temp_dir = Path(tempfile.gettempdir())
 log_file = temp_dir / "steam-session.log"
-
 logging.basicConfig(filename=str(log_file), level=logging.INFO,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+                    format="%(levelname)s - %(message)s")
 
 
 def is_program_running(name: str) -> bool:
