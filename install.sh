@@ -25,7 +25,7 @@ if [[ -z $@  || $1 == "--help" ]]; then
 elif [[ $1 == "--install" || $1 == "-i" ]]; then
 
     if [[ ! -d "$XSESSION_DIR" ]]; then
-        echo "Directory '$XSESSION_DIR' does not exist. Creating."
+        mkdir -v "$XSESSION_DIR"
     fi
 
     cp -v "$SOURCE_DIR$SESSION_SCRIPT_FILE" "$BIN_DIR$SESSION_SCRIPT_FILE"
