@@ -26,6 +26,7 @@ function logger {
 
 function check_process {
     local NAME=$1
+
     pgrep -f "${NAME}" && return 0 || return 1
 }
 
@@ -51,10 +52,14 @@ lwm 1>/dev/null 2> >(logger "ERROR") &
 sleep 0.1
 
 logger "INFO" "Disabling screensaver and screen energy saving"
-xset s off -dpms 1>/dev/null 2> >(logger "ERROR")
+xset s off -dpms 1>/dev/null 2> >(logger "ERROR") &
+
+sleep 0.1
 
 logger "INFO" "Hiding the mouse cursor"
-unclutter --start-hidden 1>/dev/null 2> >(logger "ERROR")
+unclutter --start-hidden 1>/dev/null 2> >(logger "ERROR") &
+
+sleep 0.1
 
 logger "INFO" "Starting Steam in big picture and steamos mode"
 steam -bigpicture -steamos 1>/dev/null 2> >(logger "ERROR")
