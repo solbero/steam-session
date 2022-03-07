@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SOURCE_DIR=$PWD
-BIN_DIR="/usr/local/bin/"
-XSESSION_DIR="/usr/share/xsessions/"
+BIN_DIR="/usr/local/bin"
+XSESSION_DIR="/usr/share/xsessions"
 
 XSESSION_FILE="steam.desktop"
 SESSION_SCRIPT_FILE="steam-session"
@@ -10,7 +10,8 @@ SESSION_SCRIPT_FILE="steam-session"
 if [[ $EUID != 0 ]]; then
     echo "You need to have root privileges to run this script."
     echo "Please try again using 'sudo'. Exiting."
-    exit 1
+
+    exit 2
 fi
 
 if [[ -z $*  || $1 == "--help" ]]; then
@@ -24,20 +25,21 @@ if [[ -z $*  || $1 == "--help" ]]; then
 
 elif [[ $1 == "--install" || $1 == "-i" ]]; then
 
-    if [[ ! -d "$XSESSION_DIR" ]]; then
-        mkdir -v "$XSESSION_DIR"
+    if [[ ! -d ${XSESSION_DIR} ]]; then
+        mkdir -v ${XSESSION_DIR}
     fi
 
-    cp -v "$SOURCE_DIR$SESSION_SCRIPT_FILE" "$BIN_DIR$SESSION_SCRIPT_FILE"
-    chmod -v +x "$BIN_DIR$SESSION_SCRIPT_FILE"
-    cp -v "$SOURCE_DIR$XSESSION_FILE" "$XSESSION_DIR$XSESSION_FILE"
+    cp -v "${SOURCE_DIR}/${SESSION_SCRIPT_FILE}" "${BIN_DIR}/${SESSION_SCRIPT_FILE}"
+    cp -v "${SOURCE_DIR}/${XSESSION_FILE}" "${XSESSION_DIR}/${XSESSION_FILE}"
+
+    chmod -v +x "${BIN_DIR}/${SESSION_SCRIPT_FILE}"
 
     exit 0
 
 elif [[ $1 == "--remove" || $1 == "-r" ]]; then
 
-    rm -v "$BIN_DIR$SESSION_SCRIPT_FILE"
-    rm -v "$XSESSION_DIR$XSESSION_FILE"
+    rm -v "${BIN_DIR}/${SESSION_SCRIPT_FILE}"
+    rm -v "${XSESSION_DIR}/${XSESSION_FILE}"
 
     exit 0
 
