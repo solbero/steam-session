@@ -44,13 +44,14 @@ function monitor_process {
     done
 }
 
-logger "INFO" "Starting Steam session"
+logger "INFO" "Starting Steam Xsession"
 
 logger "INFO" "Starting window manager"
 openbox-session 1>/dev/null 2> >(logger "WARNING") &
 
 sleep 0.1
 
+logger "INFO" "Disabling screensaver and screen energy saving mode"
 xset s off -dpms 1>/dev/null 2> >(logger "WARNING") &
 
 sleep 0.1
