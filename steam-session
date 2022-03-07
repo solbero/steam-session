@@ -47,17 +47,16 @@ function monitor_process {
 logger "INFO" "Starting Steam session"
 
 logger "INFO" "Starting window manager"
-openbox-session 1>/dev/null 2> >(logger "ERROR") &
+openbox-session 1>/dev/null 2> >(logger "WARNING") &
 
 sleep 0.1
 
-logger "INFO" "Disabling screensaver and screen energy saving"
-xset s off -dpms 1>/dev/null 2> >(logger "ERROR") &
+xset s off -dpms 1>/dev/null 2> >(logger "WARNING") &
 
 sleep 0.1
 
 logger "INFO" "Hiding the mouse cursor"
-unclutter --start-hidden 1>/dev/null 2> >(logger "ERROR") &
+unclutter --start-hidden 1>/dev/null 2> >(logger "WARNING") &
 
 sleep 0.1
 
