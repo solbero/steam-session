@@ -37,7 +37,7 @@ function monitor_process {
     while true; do
         if ! check_process "$NAME"; then
             logger "INFO" "${NAME^} has stopped. Restarting"
-            eval "$COMMAND" 1>/dev/null 2> >(logger)
+            eval "$COMMAND" > /dev/null 2>&1
         else
             sleep 1
         fi
@@ -47,7 +47,7 @@ function monitor_process {
 logger "INFO" "Starting Steam session"
 
 logger "INFO" "Starting window manager"
-lwm 1>/dev/null 2> >(logger "ERROR") &
+xfwm4 1>/dev/null 2> >(logger "ERROR") &
 
 sleep 0.1
 
@@ -62,7 +62,7 @@ unclutter --start-hidden 1>/dev/null 2> >(logger "ERROR") &
 sleep 0.1
 
 logger "INFO" "Starting Steam in big picture and steamos mode"
-steam -bigpicture -steamos 1>/dev/null 2> >(logger "ERROR")
+steam -bigpicture -steamos > /dev/null 2>&1
 
 sleep 5
 
