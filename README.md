@@ -20,7 +20,7 @@ Then log out of your current session and select the *Steam* session in your disp
 
 You must have these dependencies installed for Steam Session to function:
 
-* **xfwm4**: window manager
+* **openbox**: window manager
 * **xset**: disabling the screensaver and screen energy saving mode
 * **unclutter**: hiding the mouse cursor
 * **steam**: displaying and playing games

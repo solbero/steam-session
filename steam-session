@@ -47,7 +47,7 @@ function monitor_process {
 logger "INFO" "Starting Steam session"
 
 logger "INFO" "Starting window manager"
-xfwm4 1>/dev/null 2> >(logger "ERROR") &
+openbox-session 1>/dev/null 2> >(logger "ERROR") &
 
 sleep 0.1
 
