@@ -13,7 +13,7 @@ if [[ $EUID != 0 ]]; then
     exit 1
 fi
 
-if [[ -z $@  || $1 == "--help" ]]; then
+if [[ -z $*  || $1 == "--help" ]]; then
     echo "Usage install.py [OPTION]"
     echo "OPTIONS:"
     printf "    %-4s%s\n" "-i," "--install"
@@ -42,7 +42,7 @@ elif [[ $1 == "--remove" || $1 == "-r" ]]; then
     exit 0
 
 else
-    echo "Unrecognized arguments: '$@'"
+    echo "Unrecognized arguments: '$*'"
     echo "Try '$(basename "$0") --help' for more information"
 
     exit 1
