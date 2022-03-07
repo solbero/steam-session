@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -o errexit
+set -o nounset
+
 SOURCE_DIR=$PWD
 BIN_DIR="/usr/local/bin"
 XSESSION_DIR="/usr/share/xsessions"
