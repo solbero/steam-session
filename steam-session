@@ -1,109 +1,65 @@
-#!/usr/bin/env python3
+#!/bin/bash
 
-# Imports
-import logging
-import psutil
-import shlex
-import subprocess
-import tempfile
-from pathlib import Path
-from time import sleep
+set -o errexit
+set -o nounset
 
-# Shell commands
-commands = {
-    "openbox": "openbox-session",
-    "xset": "xset s off -dpms",
-    "unclutter": "unclutter --start-hidden",
-    "steam": "steam -bigpicture -steamos"
+NOW=$(date "+%D %T")
+LOG_FILE="/tmp/steam-session.log"
+
+if [[ -e ${LOG_FILE} ]]; then
+    mv "${LOG_FILE}" "${LOG_FILE}.old"
+    touch "${LOG_FILE}"
+fi
+
+function logger {
+    local LEVEL=$1
+
+    if [[ $# -ge 2 && -n "$2" ]]; then
+        MESSAGE=$2
+        echo "${NOW} - [${LEVEL}] - ${MESSAGE}" >> ${LOG_FILE}
+    else
+        while read -r MESSAGE; do
+            echo "${NOW} - [${LEVEL}] - ${MESSAGE}" >> ${LOG_FILE}
+        done
+    fi
 }
 
-# Logging
-temp_dir = Path(tempfile.gettempdir())
-log_file = temp_dir / "steam-session.log"
-logging.basicConfig(filename=str(log_file), level=logging.DEBUG,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+function check_process {
+    local NAME=$1
+    pgrep -f "${NAME}" && return 1 || return 0
+}
 
+function monitor_process {
+    local NAME=$1
+    local COMMAND=$2
 
-# Functions
-def is_process_running(name: str) -> bool:
-    """Check if program is running.
+    while true; do
+        if check_process "$NAME"; then
+            logger "INFO" "${NAME^} has stopped. Restarting"
+            eval "$COMMAND" 1>/dev/null 2> >(logger)
+        else
+            sleep 1
+        fi
+    done
+}
 
-    Args:
-        name: Name of program to monitor.
+logger "INFO" "Starting Steam session"
 
-    Returns: Boolean indicating whether the program is running or not.
-    """
-    pids = []
+logger "INFO" "Starting window manager"
+lwm 1>/dev/null 2> >(logger "ERROR") &
 
-    # Iterate over the all the running process
-    for proc in psutil.process_iter():
-        try:
-            # Check if process name contains the given name string.
-            if name in proc.name().lower():
-                pids.append(proc.pid)
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
+sleep 0.1
 
-    # Return `True` if PIDs exists for process name
-    if len(pids):
-        return True
-    else:
-        return False
+logger "INFO" "Disabling screensaver and screen energy saving"
+xset s off -dpms 1>/dev/null 2> >(logger "ERROR")
 
+logger "INFO" "Hiding the mouse cursor"
+unclutter --start-hidden 1>/dev/null 2> >(logger "ERROR")
 
-def monitor_process(name: str):
-    """Monitor a process and restart if stopped."""
-    logging.info(f"Starting to monitor '{name}' process")
-    while True:
-        if not is_process_running(name):
-            logging.info(f"Process '{name}' has stopped. Restarting")
-            run_shell_command(commands[name])
-        else:
-            sleep(1)
+logger "INFO" "Starting Steam in big picture and steamos mode"
+steam -bigpicture -steamos 1>/dev/null 2> >(logger "ERROR")
 
+sleep 5
 
-def run_shell_command(cmd: str) -> None:
-    """Run a command using subprocess.
-
-    Args:
-        cmd: Command to run.
-    """
-    cmd_args = shlex.split(cmd)
-    logging.info(f"Starting '{cmd_args[0]}'")
-
-    try:
-        logging.debug(f"Subprocess called with: '{cmd_args}'")
-        subprocess.Popen(cmd_args, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
-
-    except (OSError, subprocess.CalledProcessError) as exception:
-        logging.error(f"Failed to start '{cmd_args[0]}'!")
-        logging.error(f"Exception occurred: {str(exception)}")
-
-    else:
-        logging.debug("Subprocess finished")
-
-
-def main() -> None:
-    # Start the desktop enviroment
-    run_shell_command(commands['lwm'])
-
-    # Disable screen-saver and screen energy saving
-    run_shell_command(commands['xset'])
-
-    # Hide the mouse cursor
-    run_shell_command(commands['unclutter'])
-
-    sleep(1)
-
-    # Start steam
-    run_shell_command(commands['steam'])
-
-    sleep(5)
-
-    # Monitor the steam process and restart if stopped
-    monitor_process("steam")
-
-
-if __name__ == "__main__":
-    main()
+logger "INFO" "Starting to monitor Steam"
+monitor_process "steam" "steam -bigpicture -steamos"
