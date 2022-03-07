@@ -36,7 +36,7 @@ function monitor_process {
 
     while true; do
         if ! check_process "$NAME"; then
-            logger "INFO" "${NAME^} has stopped. Restarting"
+            logger "WARNING" "${NAME^} has stopped. Restarting"
             eval "$COMMAND" > /dev/null 2>&1
         else
             sleep 1
@@ -44,7 +44,7 @@ function monitor_process {
     done
 }
 
-logger "INFO" "Starting Steam Xsession"
+logger "INFO" "Starting Steam session"
 
 logger "INFO" "Starting window manager"
 openbox-session 1>/dev/null 2> >(logger "WARNING") &
@@ -61,6 +61,7 @@ unclutter --start-hidden 1>/dev/null 2> >(logger "WARNING") &
 
 sleep 0.1
 
+logger "INFO" "Starting Steam in big picture mode"
 steam -bigpicture > /dev/null 2>&1 &
 
 sleep 5
