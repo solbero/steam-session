@@ -27,7 +27,7 @@ function logger {
 function is_running {
     local NAME=$1
 
-    pgrep "${NAME}" && return 0 || return 1
+    pgrep -x "${NAME}" && return 0 || return 1
 }
 
 function monitor_process {
