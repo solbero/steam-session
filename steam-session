@@ -37,7 +37,7 @@ function monitor_process {
     while true; do
         if ! check_process "$NAME"; then
             logger "WARNING" "${NAME^} has stopped. Restarting"
-            eval "$COMMAND" > /dev/null 2>&1
+            eval "${COMMAND}" &>/dev/null &
         else
             sleep 1
         fi
@@ -62,7 +62,7 @@ unclutter --start-hidden 1>/dev/null 2> >(logger "WARNING") &
 sleep 0.1
 
 logger "INFO" "Starting Steam in big picture mode"
-steam -bigpicture > /dev/null 2>&1 &
+steam -bigpicture &>/dev/null &
 
 sleep 5
 
