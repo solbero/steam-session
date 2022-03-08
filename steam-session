@@ -38,6 +38,7 @@ function monitor_process {
         if ! is_running "${NAME}"; then
             logger "WARNING" "${NAME^} has stopped. Restarting"
             eval "${COMMAND}" &>/dev/null &
+            sleep 5
         else
             sleep 1
         fi
