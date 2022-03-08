@@ -24,7 +24,7 @@ function logger {
     fi
 }
 
-function check_process {
+function is_running {
     local NAME=$1
 
     pgrep "${NAME}" && return 0 || return 1
@@ -35,7 +35,7 @@ function monitor_process {
     local COMMAND=$2
 
     while true; do
-        if ! check_process "$NAME"; then
+        if ! is_running "${NAME}"; then
             logger "WARNING" "${NAME^} has stopped. Restarting"
             eval "${COMMAND}" &>/dev/null &
         else
