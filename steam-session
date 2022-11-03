@@ -63,9 +63,9 @@ unclutter --start-hidden 1>/dev/null 2> >(logger "WARNING") &
 sleep 0.1
 
 logger "INFO" "Starting Steam in big picture mode"
-steam -bigpicture &>/dev/null &
+steam -gamepadui &>/dev/null &
 
 sleep 5
 
 logger "INFO" "Starting to monitor Steam"
-monitor_process "steam" "steam -bigpicture"
+monitor_process "steam" "steam -gamepadui"
